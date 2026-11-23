@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,8 +16,16 @@ namespace pr7
     {
         static void Main(string[] args)
         {
+            Debug.Listeners.Add(new TextWriterTraceListener("debug.log"));
+            Debug.AutoFlush = true;
+
+            Debug.WriteLine($"=== Запуск программы: {DateTime.Now} ===");
+
             CookieContainer Token = SignIn("user", "user");
-            GetContent(Token);
+            string html = GetContent(Token);
+            ParsingHtml(html);
+
+            Debug.WriteLine("=== Завершение работы ===");
             Console.Read();
         }
 
@@ -69,6 +79,21 @@ namespace pr7
                     string responseFromServer = reader.ReadToEnd();
                     return responseFromServer;
                 }
+            }
+        }
+
+        public static void ParsingHtml(string htmlCode)
+        {
+            var html = new HtmlDocument();
+            html.LoadHtml(htmlCode);
+            var Document = html.DocumentNode;
+            IEnumerable DivsNews = Document.Descendants(0).Where(n => n.HasClass("news"));
+            foreach (HtmlNode DivNews in DivsNews)
+            {
+                var src = DivNews.ChildNodes[1].GetAttributeValue("src", "none");
+                var name = DivNews.ChildNodes[3].InnerText;
+                var description = DivNews.ChildNodes[5].InnerText;
+                Console.WriteLine(name + "\n" + "Изображение: " + src + "\n" + "Описание: " + description + "\n");
             }
         }
     }
