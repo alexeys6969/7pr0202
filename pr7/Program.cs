@@ -14,7 +14,8 @@ namespace pr7
     {
         static void Main(string[] args)
         {
-            SignIn("user", "user");
+            CookieContainer Token = SignIn("user", "user");
+            GetContent(Token);
             Console.Read();
         }
 
@@ -50,6 +51,25 @@ namespace pr7
             }
 
             return cookies;
+        }
+
+        public static string GetContent(CookieContainer cookies)
+        {
+            string url = "http://localhost/news.permaviat.ru/main";
+            Debug.WriteLine($"Выполняем запрос: {url}");
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.CookieContainer = cookies;
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                Debug.WriteLine($"Статус выполнения: {response.StatusCode}");
+                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                {
+                    string responseFromServer = reader.ReadToEnd();
+                    return responseFromServer;
+                }
+            }
         }
     }
 }
